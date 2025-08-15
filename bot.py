@@ -60,6 +60,18 @@ async def on_ready():
     agendar_mensagens.start()
 
 # =========================
+# Comando manual de teste
+# =========================
+@bot.command()
+async def teste(ctx, *, evento="TESTE MANUAL"):
+    enviado = await enviar_mensagem(evento)
+    if enviado:
+        await ctx.send(f"✅ Mensagem de teste enviada: {evento}")
+    else:
+        await ctx.send("❌ Erro ao tentar enviar a mensagem.")
+
+
+# =========================
 # Servidor Flask para Web Service
 # =========================
 app = Flask("")
