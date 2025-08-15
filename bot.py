@@ -4,13 +4,17 @@ from datetime import datetime
 import pytz
 import os  # Para pegar variáveis de ambiente
 
-# Configurações via variáveis de ambiente
-TOKEN = os.environ["TOKEN"]  # Token do bot
-GUILD_ID = int(os.environ["GUILD_ID"])  # ID do servidor
-CHANNEL_ID = int(os.environ["CHANNEL_ID"])  # ID do canal
-ROLE_ID = int(os.environ["ROLE_ID"])  # ID do cargo
+# =========================
+# CONFIGURAÇÃO VIA AMBIENTE
+# =========================
+TOKEN = os.environ["TOKEN"]          # Token do bot
+GUILD_ID = int(os.environ["GUILD_ID"])       # ID do servidor
+CHANNEL_ID = int(os.environ["CHANNEL_ID"])   # ID do canal
+ROLE_ID = int(os.environ["ROLE_ID"])         # ID do cargo
 
-# Intents
+# =========================
+# INTENTS
+# =========================
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
@@ -18,7 +22,9 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-
+# =========================
+# FUNÇÃO PARA ENVIAR MENSAGEM
+# =========================
 async def enviar_mensagem(evento):
     guild = bot.get_guild(GUILD_ID)
     if guild is None:
@@ -37,13 +43,15 @@ async def enviar_mensagem(evento):
 
     try:
         await canal.send(f"{role.mention} {evento}")
-        print("[DEBUG] Mensagem enviada com sucesso!")
+        print(f"[DEBUG] Mensagem enviada: {evento}")
         return True
     except Exception as e:
         print(f"[ERRO] Falha ao enviar mensagem: {e}")
         return False
 
-
+# =========================
+# AGENDAMENTO AUTOMÁTICO
+# =========================
 @tasks.loop(minutes=1)
 async def agendar_mensagens():
     tz = pytz.timezone("America/Sao_Paulo")
@@ -60,8 +68,9 @@ async def agendar_mensagens():
         print(f"[DEBUG] Horário bateu! Evento: {eventos[hora_atual]}")
         await enviar_mensagem(eventos[hora_atual])
 
-
-# Comando manual de teste
+# =========================
+# COMANDO MANUAL DE TESTE
+# =========================
 @bot.command()
 async def teste(ctx, *, evento="TESTE MANUAL"):
     enviado = await enviar_mensagem(evento)
@@ -70,12 +79,16 @@ async def teste(ctx, *, evento="TESTE MANUAL"):
     else:
         await ctx.send("❌ Erro ao tentar enviar a mensagem.")
 
-
+# =========================
+# EVENTO ON_READY
+# =========================
 @bot.event
 async def on_ready():
     print(f"Bot conectado como {bot.user}")
     print("Iniciando agendamento de mensagens...")
     agendar_mensagens.start()
 
-
+# =========================
+# RODAR O BOT
+# =========================
 bot.run(TOKEN)
