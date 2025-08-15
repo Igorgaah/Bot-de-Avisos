@@ -2,12 +2,13 @@ import discord
 from discord.ext import commands, tasks
 from datetime import datetime
 import pytz
+import os  # Para pegar variáveis de ambiente
 
-# Configurações
-TOKEN = "MTQwNTk0Mjg0ODMxNDAxNTg3Nw.Gd72X2.5IdpBbKCLYEuFUViGcUmyVi4nhxnGmg0KyV1_M"  # Coloque seu token seguro aqui
-GUILD_ID = 1180698620895432735  # ID do servidor
-CHANNEL_ID = 1180698621751066718  # ID do canal
-ROLE_ID = 1316923743192219680  # Substitua pelo ID do cargo [FALA BAIXO NENGUE]
+# Configurações via variáveis de ambiente
+TOKEN = os.environ["TOKEN"]  # Token do bot
+GUILD_ID = int(os.environ["GUILD_ID"])  # ID do servidor
+CHANNEL_ID = int(os.environ["CHANNEL_ID"])  # ID do canal
+ROLE_ID = int(os.environ["ROLE_ID"])  # ID do cargo
 
 # Intents
 intents = discord.Intents.default()
@@ -16,6 +17,7 @@ intents.guilds = True
 intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
+
 
 async def enviar_mensagem(evento):
     guild = bot.get_guild(GUILD_ID)
@@ -41,7 +43,7 @@ async def enviar_mensagem(evento):
         print(f"[ERRO] Falha ao enviar mensagem: {e}")
         return False
 
-# Tarefa agendada
+
 @tasks.loop(minutes=1)
 async def agendar_mensagens():
     tz = pytz.timezone("America/Sao_Paulo")
@@ -51,15 +53,15 @@ async def agendar_mensagens():
     eventos = {
         "12:55": "EVENTO PVP",
         "18:55": "BOSS RYUKUDDOU",
-        "19:55": "EVENTO PVP",
-        "13:48": "ACORDA SEUS ARROMBADOSSSSSSSSSSSSSSSS",
+        "19:55": "EVENTO PVP"
     }
 
     if hora_atual in eventos:
         print(f"[DEBUG] Horário bateu! Evento: {eventos[hora_atual]}")
         await enviar_mensagem(eventos[hora_atual])
 
-# Comando manual para teste
+
+# Comando manual de teste
 @bot.command()
 async def teste(ctx, *, evento="TESTE MANUAL"):
     enviado = await enviar_mensagem(evento)
@@ -68,10 +70,12 @@ async def teste(ctx, *, evento="TESTE MANUAL"):
     else:
         await ctx.send("❌ Erro ao tentar enviar a mensagem.")
 
+
 @bot.event
 async def on_ready():
     print(f"Bot conectado como {bot.user}")
     print("Iniciando agendamento de mensagens...")
     agendar_mensagens.start()
+
 
 bot.run(TOKEN)
